@@ -1,6 +1,6 @@
 use bevy::{camera::ScalingMode, prelude::*};
 
-use crate::components::{Player, Wall};
+use crate::components::Player;
 
 fn spawn_camera(mut commands: Commands) {
     commands.spawn((
@@ -16,8 +16,8 @@ fn spawn_camera(mut commands: Commands) {
 }
 
 pub(crate) fn camera_follow(
-    player: Single<&Transform, (With<Player>, Without<Camera2d>, Without<Wall>)>,
-    mut camera: Single<&mut Transform, (With<Camera2d>, Without<Player>, Without<Wall>)>,
+    player: Single<&Transform, (With<Player>, Without<Camera2d>)>,
+    mut camera: Single<&mut Transform, (With<Camera2d>, Without<Player>)>,
 ) {
     camera.translation.x = player.translation.x;
     camera.translation.y = player.translation.y;

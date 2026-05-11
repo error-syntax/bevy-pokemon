@@ -39,9 +39,10 @@ fn spawn_player(
 fn handle_player_movement(
     player: Single<
         (&mut Transform, &mut WalkAnimation),
-        (With<Player>, Without<Camera2d>, Without<crate::components::Wall>),
+        (With<Player>, Without<Camera2d>),
     >,
     buttons: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
 ) {
     let (mut transform, mut anim) = player.into_inner();
     let mut direction = Vec2::ZERO;
@@ -64,8 +65,8 @@ fn handle_player_movement(
         anim.set_direction(move_dir);
 
         direction = direction.normalize();
-        transform.translation.x += direction.x * VELOCITY;
-        transform.translation.y += direction.y * VELOCITY;
+        transform.translation.x += direction.x * VELOCITY * time.delta_secs();
+        transform.translation.y += direction.y * VELOCITY * time.delta_secs();
     }
 }
 
