@@ -2,27 +2,39 @@ use bevy::{
     math::bounding::{Aabb2d, BoundingCircle, IntersectsVolume},
     prelude::*,
 };
+use bevy_ecs_tilemap::prelude::{TilePos, TilemapGridSize, TilemapId};
 
-use crate::components::{Collidable, Player};
+use crate::components::Player;
 use crate::constants::PLAYER_SIZE;
+use crate::map::tile_kind::TileKind;
 
-pub(crate) fn handle_collision(
-    mut player: Single<(&Sprite, &mut Transform), (With<Player>, Without<Collidable>)>,
-    walls: Query<(&Sprite, &Transform), (With<Collidable>, Without<Player>)>,
+fn handle_collision(
+    player: Single<&mut Transform, With<Player>>,
+    impassable: Query<(&TilePos, &TilemapId, &TileKind)>,
+    tilemaps: Query<(&GlobalTransform, &TilemapGridSize)>,
 ) {
-    let player_pos = player.1.translation.xy();
+    let mut transform = player.into_inner();
     let player_radius = PLAYER_SIZE / 2.;
-    let player_collider = BoundingCircle::new(player_pos, player_radius);
 
-    for (sprite, collidable_transform) in &walls {
-        let collidable_pos = collidable_transform.translation.xy();
-        let collidable_half = sprite.custom_size.unwrap() / 2.;
-        let collidable_ent = Aabb2d::new(collidable_pos, collidable_half);
+    for (tile_pos, tilemap_id, kind) in &impassable {
+        if !matches!(kind, TileKind::Impassable) { continue }
 
-        if player_collider.intersects(&collidable_ent) {
+        let Ok((tilemap_transform, grid_size)) = tilemaps.get(tilemap_id.0) else { continue };
+        let origin = tilemap_transform.translation().xy();
+        let tile_center = origin + Vec2::new(
+            tile_pos.x as f32 * grid_size.x,
+            tile_pos.y as f32 * grid_size.y,
+        );
+        let tile_half = Vec2::new(grid_size.x / 2.0, grid_size.y / 2.0);
+
+        let player_pos = transform.translation.xy();
+        let player_collider = BoundingCircle::new(player_pos, player_radius);
+        let tile_aabb = Aabb2d::new(tile_center, tile_half);
+
+        if player_collider.intersects(&tile_aabb) {
             let closest = Vec2::new(
-                player_pos.x.clamp(collidable_pos.x - collidable_half.x, collidable_pos.x + collidable_half.x),
-                player_pos.y.clamp(collidable_pos.y - collidable_half.y, collidable_pos.y + collidable_half.y),
+                player_pos.x.clamp(tile_center.x - tile_half.x, tile_center.x + tile_half.x),
+                player_pos.y.clamp(tile_center.y - tile_half.y, tile_center.y + tile_half.y),
             );
             let offset = player_pos - closest;
             let dist = offset.length();
@@ -31,8 +43,8 @@ pub(crate) fn handle_collision(
             } else {
                 Vec2::new(player_radius, 0.)
             };
-            player.1.translation.x += correction.x;
-            player.1.translation.y += correction.y;
+            transform.translation.x += correction.x;
+            transform.translation.y += correction.y;
         }
     }
 }
@@ -40,5 +52,7 @@ pub(crate) fn handle_collision(
 pub struct CollisionPlugin;
 
 impl Plugin for CollisionPlugin {
-    fn build(&self, _app: &mut App) {}
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, handle_collision);
+    }
 }

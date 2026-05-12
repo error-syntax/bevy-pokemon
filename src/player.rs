@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use crate::animation::{animate_player, new_animation_timer};
 use crate::camera::camera_follow;
-use crate::collision::handle_collision;
 use crate::components::{MoveDirection, Player, WalkAnimation};
 use crate::constants::{PLAYER_SIZE, SHEET_COLS, SHEET_ROWS, SPRITE_H, SPRITE_W, VELOCITY};
 
@@ -32,7 +31,7 @@ fn spawn_player(
         },
         anim,
         new_animation_timer(),
-        Transform::from_xyz(0.0, 0.0, 1.0),
+        Transform::from_xyz(160.0, 144.0, 1.0),
     ));
 }
 
@@ -70,6 +69,27 @@ fn handle_player_movement(
     }
 }
 
+fn handle_flash(
+    player: Single<
+        &mut Transform,
+        (With<Player>, Without<Camera2d>),
+    >,
+    buttons: Res<ButtonInput<KeyCode>>,
+) {
+    let mut transform = player.into_inner();
+    let mut direction = Vec2::ZERO;
+
+    if buttons.pressed(KeyCode::KeyW) { direction.y += 1.0; }
+    if buttons.pressed(KeyCode::KeyS) { direction.y -= 1.0; }
+    if buttons.pressed(KeyCode::KeyA) { direction.x -= 1.0; }
+    if buttons.pressed(KeyCode::KeyD) { direction.x += 1.0; }
+
+    if buttons.pressed(KeyCode::Space) {
+      transform.translation.x += direction.x * 15.;
+      transform.translation.y += direction.y * 15.;
+    }
+}
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
@@ -77,7 +97,7 @@ impl Plugin for PlayerPlugin {
         app.add_systems(Startup, spawn_player)
             .add_systems(
                 Update,
-                (handle_player_movement, animate_player, camera_follow, handle_collision).chain(),
+                (handle_player_movement, handle_flash, animate_player, camera_follow).chain(),
             );
     }
 }
