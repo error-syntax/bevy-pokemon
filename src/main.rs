@@ -3,19 +3,28 @@ mod camera;
 mod collision;
 mod components;
 mod constants;
+mod map;
 mod player;
-mod world;
+mod state;
 
 use animation::AnimationPlugin;
 use bevy::prelude::*;
 use camera::CameraPlugin;
 use collision::CollisionPlugin;
+use map::plugin::MapPlugin;
 use player::PlayerPlugin;
-use world::WorldPlugin;
+use state::GameState;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
-        .add_plugins((PlayerPlugin, AnimationPlugin, CameraPlugin, WorldPlugin, CollisionPlugin))
+        .init_state::<GameState>()
+        .add_plugins((
+            MapPlugin,
+            PlayerPlugin,
+            AnimationPlugin,
+            CameraPlugin,
+            CollisionPlugin,
+        ))
         .run();
 }

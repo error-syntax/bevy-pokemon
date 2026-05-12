@@ -3,11 +3,6 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct Player;
 
-#[derive(Component)]
-pub struct Wall;
-
-#[derive(Component)]
-pub struct Collidable;
 
 #[derive(Component)]
 pub struct AnimationTimer(pub Timer);
