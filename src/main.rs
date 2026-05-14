@@ -3,9 +3,11 @@ mod camera;
 mod collision;
 mod components;
 mod constants;
+mod door;
 mod map;
 mod player;
 mod state;
+mod warp;
 
 use animation::AnimationPlugin;
 use bevy::prelude::*;
@@ -14,6 +16,7 @@ use collision::CollisionPlugin;
 use map::plugin::MapPlugin;
 use player::PlayerPlugin;
 use state::GameState;
+use warp::WarpPlugin;
 
 fn main() {
     App::new()
@@ -25,6 +28,7 @@ fn main() {
             AnimationPlugin,
             CameraPlugin,
             CollisionPlugin,
+            WarpPlugin
         ))
         .run();
 }

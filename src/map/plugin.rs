@@ -6,6 +6,11 @@ use crate::state::GameState;
 
 pub struct MapPlugin;
 
+#[derive(Resource)]
+pub struct CurrentMap {
+  pub handle: Handle<TiledMapAsset>
+}
+
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(TiledPlugin(TiledPluginConfig {
@@ -22,7 +27,9 @@ impl Plugin for MapPlugin {
 }
 
 fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(TiledMap(asset_server.load("maps/Pallet_Town.tmx")));
+  let handle: Handle<TiledMapAsset> = asset_server.load("maps/Pallet_Town.tmx");
+  commands.spawn(TiledMap(handle.clone()));
+  commands.insert_resource(CurrentMap { handle });
 }
 
 fn transition_to_playing(
