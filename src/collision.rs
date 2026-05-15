@@ -19,7 +19,7 @@ fn handle_collision(
     for (tile_pos, tilemap_id, kind) in &impassable {
       if !matches!(kind, TileKind::Impassable | TileKind::Water) { continue }
 
-        let (tile_center, tile_half) = get_tile_center_and_half_size(&tilemaps, &tile_pos, tilemap_id);
+        let (tile_center, tile_half) = get_tile_collider(&tilemaps, &tile_pos, tilemap_id);
 
         if tile_center == Vec2::default() && tile_half == Vec2::default() { continue }
 
@@ -45,7 +45,7 @@ fn handle_collision(
     }
 }
 
-fn get_tile_center_and_half_size(tilemaps: &Query<(&GlobalTransform, &TilemapGridSize)>, tile_pos: &TilePos, tilemap_id: &TilemapId) -> (Vec2, Vec2) {
+fn get_tile_collider(tilemaps: &Query<(&GlobalTransform, &TilemapGridSize)>, tile_pos: &TilePos, tilemap_id: &TilemapId) -> (Vec2, Vec2) {
   let Ok((tilemap_transform, grid_size)) = tilemaps.get(tilemap_id.0) else {  return (Vec2::default(), Vec2::default()) };
   let tile_origin = tilemap_transform.translation().xy();
   let tile_center = tile_origin + Vec2::new(

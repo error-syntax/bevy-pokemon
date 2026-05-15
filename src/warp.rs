@@ -2,41 +2,65 @@ use bevy::{
   app::{App, Plugin, Update},
   asset::AssetServer,
   ecs::{
-    query::{Changed, With},
+    query::With,
     system::{Query, Res, ResMut}
   },
   prelude::*,
   state::{condition::in_state, state::NextState}
 };
-use bevy_ecs_tilemap::tiles::TilePos;
+use bevy_ecs_tilemap::prelude::{TilePos, TilemapGridSize, TilemapId};
 
 use crate::{components::Player, map::{plugin::CurrentMap, tile_kind::TileKind}, state::GameState};
 
 pub struct WarpPlugin;
 
 fn check_warp(
-    player: Query<&TilePos, (With<Player>, Changed<TilePos>)>,
-    tiles: Query<(&TilePos, &TileKind)>,
+    player: Query<&Transform, With<Player>>,
+    tiles: Query<(&TilePos, &TilemapId, &TileKind)>,
+    tilemaps: Query<(&GlobalTransform, &TilemapGridSize)>,
     mut next_state: ResMut<NextState<GameState>>,
     mut current_map: ResMut<CurrentMap>,
     asset_server: Res<AssetServer>,
 ) {
-    let Ok(player_pos) = player.single() else { return };
+    let Ok(player_transform) = player.single() else { return };
+    let player_pos = player_transform.translation.xy();
 
-    for (tile_pos, tile_kind) in &tiles {
-      if tile_pos != player_pos { continue }
+    for (tile_pos, tilemap_id, tile_kind) in &tiles {
+        let Ok((tilemap_transform, grid_size)) = tilemaps.get(tilemap_id.0) else { continue };
 
-      match tile_kind {
-          TileKind::Door { target_map, target_x, target_y } |
-          TileKind::Warp { target_map, target_x, target_y } => {
+        let tile_origin = tilemap_transform.translation().xy();
+        let tile_center = tile_origin + Vec2::new(
+            tile_pos.x as f32 * grid_size.x,
+            tile_pos.y as f32 * grid_size.y,
+        );
+        let tile_half = Vec2::new(grid_size.x / 2., grid_size.y / 2.);
 
-              current_map.handle = asset_server.load(
-                  format!("maps/{}.tmx", target_map)
-              );
-              next_state.set(GameState::LoadingMap);
-          }
-          _ => {}
-      }
+        let within_tile = player_pos.x >= tile_center.x - tile_half.x
+            && player_pos.x <= tile_center.x + tile_half.x
+            && player_pos.y >= tile_center.y - tile_half.y
+            && player_pos.y <= tile_center.y + tile_half.y;
+
+        if !within_tile { continue }
+
+        match tile_kind {
+            TileKind::Door { target_map, target_x, target_y } => {
+                info!(
+                    "Player entered door at tile ({}, {}) -> map: {}, pos: ({}, {})",
+                    tile_pos.x, tile_pos.y, target_map, target_x, target_y
+                );
+                // current_map.handle = asset_server.load(
+                //     format!("maps/{}.tmx", target_map)
+                // );
+                // next_state.set(GameState::LoadingMap);
+            }
+            TileKind::Warp { target_map, target_x, target_y } => {
+                current_map.handle = asset_server.load(
+                    format!("maps/{}.tmx", target_map)
+                );
+                next_state.set(GameState::LoadingMap);
+            }
+            _ => {}
+        }
     }
 }
 

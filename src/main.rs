@@ -3,7 +3,6 @@ mod camera;
 mod collision;
 mod components;
 mod constants;
-mod door;
 mod map;
 mod player;
 mod state;

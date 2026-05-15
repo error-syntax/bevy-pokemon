@@ -21,18 +21,16 @@ impl TileKind {
                 "Impassable" => TileKind::Impassable,
                 "WildGrass"  => TileKind::WildGrass,
                 "Water"      => TileKind::Water,
-                "Door"       => {
-                    match (str_prop(props, "target_map"), int_prop(props, "target_x"), int_prop(props, "target_y")) {
-                        (Some(map), Some(x), Some(y)) => TileKind::Door { target_map: map.to_owned(), target_x: x, target_y: y },
-                        _ => TileKind::Passable,
-                    }
-                }
-                "Warp"       => {
-                    match (str_prop(props, "target_map"), int_prop(props, "target_x"), int_prop(props, "target_y")) {
-                        (Some(map), Some(x), Some(y)) => TileKind::Warp { target_map: map.to_owned(), target_x: x, target_y: y },
-                        _ => TileKind::Passable,
-                    }
-                }
+                "Door"       => TileKind::Door {
+                    target_map: str_prop(props, "target_map").unwrap_or("").to_owned(),
+                    target_x: int_prop(props, "target_x").unwrap_or(0),
+                    target_y: int_prop(props, "target_y").unwrap_or(0),
+                },
+                "Warp"       => TileKind::Warp {
+                    target_map: str_prop(props, "target_map").unwrap_or("").to_owned(),
+                    target_x: int_prop(props, "target_x").unwrap_or(0),
+                    target_y: int_prop(props, "target_y").unwrap_or(0),
+                },
                 _ => TileKind::Passable,
             },
             _ => TileKind::Passable,
