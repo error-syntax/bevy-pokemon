@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.0" orientation="orthogonal" renderorder="right-down"
+     width="8" height="8" tilewidth="8" tileheight="8" infinite="0" nextlayerid="3" nextobjectid="1">
+  <tileset firstgid="1" source="lobby.tsx"/>
+  <layer id="1" name="Ground" width="8" height="8">
+    <data encoding="csv">
+2,2,2,2,2,2,63,2,
+34,34,34,34,34,34,64,34,
+56,70,56,70,56,70,56,70,
+70,56,70,56,70,56,70,56,
+56,70,56,70,56,70,56,70,
+70,56,70,56,70,56,70,56,
+56,70,5,5,5,5,56,70,
+70,56,21,21,21,21,70,56
+    </data>
+  </layer>
+  <layer id="2" name="CollisionLayer" width="8" height="8">
+    <data encoding="csv">
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0
+    </data>
+  </layer>
+</map>

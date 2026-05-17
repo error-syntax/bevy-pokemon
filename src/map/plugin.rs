@@ -27,7 +27,7 @@ impl Plugin for MapPlugin {
 }
 
 fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>) {
-  let handle: Handle<TiledMapAsset> = asset_server.load("maps/Pallet_Town.tmx");
+  let handle: Handle<TiledMapAsset> = asset_server.load("maps/PalletTown.tmx");
   commands.spawn(TiledMap(handle.clone()));
   commands.insert_resource(CurrentMap { handle });
 }
